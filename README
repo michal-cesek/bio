@@ -1,0 +1,22 @@
+TODO
+http://docs.python-guide.org/en/latest/writing/structure/
+
+
+install:
+
+sudo apt install python3-venv
+create .venvs in ~/ direcotry 
+python3 -m venv bio
+
+https://github.com/pyenv/pyen
+source ~/.venvs/bio/bin/activate
+
+// opencv python bindings
+https://pypi.python.org/pypi/opencv-python
+pip install opencv-python && pip freeze > requirements.txt
+
+
+
+
+
+
