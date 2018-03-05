@@ -1,22 +1,38 @@
-import numpy as np
 import cv2 as cv
 
-face_cascade = cv.CascadeClassifier(
-    '/home/michal/.venvs/bio/lib/python3.5/site-packages/cv2/data/haarcascade_frontalface_default.xml')
-eye_cascade = cv.CascadeClassifier(
-    '/home/michal/.venvs/bio/lib/python3.5/site-packages/cv2/data/haarcascade_eye.xml')
-img = cv.imread('face.jpg')
+data_path = 'data/'
+
+right_ear_cascade = cv.CascadeClassifier(
+    data_path + 'haarcascade_mcs_rightear.xml')
+
+left_ear_cascade = cv.CascadeClassifier(
+    data_path + 'haarcascade_mcs_leftear.xml')
+
+if right_ear_cascade.empty():
+    raise IOError('Unable to load the right ear cascade classifier xml file')
+
+if left_ear_cascade.empty():
+    raise IOError('Unable to load the left ear cascade classifier xml file')
+
+img = cv.imread(data_path + '1.jpg')
 gray = cv.cvtColor(img, cv.COLOR_BGR2GRAY)
 
+green = (100, 170, 40)
+blue = (170, 40, 40)
 
-faces = face_cascade.detectMultiScale(gray, 1.3, 5)
-for (x, y, w, h) in faces:
-    cv.rectangle(img, (x, y), (x+w, y+h), (255, 0, 0), 2)
-    roi_gray = gray[y:y+h, x:x+w]
-    roi_color = img[y:y+h, x:x+w]
-    eyes = eye_cascade.detectMultiScale(roi_gray)
-    for (ex, ey, ew, eh) in eyes:
-        cv.rectangle(roi_color, (ex, ey), (ex+ew, ey+eh), (0, 255, 0), 2)
+# http://answers.opencv.org/question/10654/how-does-the-parameter-scalefactor-in-detectmultiscale-affect-face-detection/
+scale_factor = 1.05
+# https://stackoverflow.com/questions/22249579/opencv-detectmultiscale-minneighbors-parameter
+min_neighbors = 10
+
+right_ears = right_ear_cascade.detectMultiScale(gray, scale_factor, min_neighbors)
+for (x, y, w, h) in right_ears:
+    cv.rectangle(img, (x, y), (x + w, y + h), green, 1)
+
+left_ears = left_ear_cascade.detectMultiScale(gray, scale_factor, min_neighbors)
+for (x, y, w, h) in left_ears:
+    cv.rectangle(img, (x, y), (x + w, y + h), blue, 1)
+
 cv.imshow('img', img)
 cv.waitKey(0)
 cv.destroyAllWindows()
