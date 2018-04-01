@@ -1,6 +1,10 @@
 import cv2 as cv
 from scipy import ndimage
 
+
+# 10% gain to width and height
+boundary_gain = 0.2
+
 # http://answers.opencv.org/question/10654/how-does-the-parameter-scalefactor-in-detectmultiscale-affect-face-detection/
 scale_factor = 1.05
 # https://stackoverflow.com/questions/22249579/opencv-detectmultiscale-minneighbors-parameter
@@ -23,17 +27,13 @@ if left_ear_cascade.empty():
 
 
 def detect(img_path):
-    # print(img_path)
+    print(img_path)
     img = cv.imread(img_path)
-    res = _detect(img)
-    # TODO refactor
-    # if len(res['left']) < 1 and len(res['right'] < 1):
-    #     for angle in angles:
-    #         rotated = ndimage.rotate(img, angle)
-    #         res = _detect(rotated)
-    #         if len(res['left']) >= 1 or len(res['right'] >= 1):
-    #             return res
+    detected = _detect(img)
+    biggest = selectBigestBoundary(detected)
+    enlarged = enlargeBoundary(biggest)
 
+    res = enlarged
     return res
 
 
@@ -49,6 +49,23 @@ def _detect(img):
     }
 
 
+# 04-4, 72-4 detected left and right ear (see screenshots)
+# solution
+def selectBigestBoundary(ears):
+    cooridnates = []
+    [cooridnates.append(crd) for crd in ears['left']]
+    [cooridnates.append(crd) for crd in ears['right']]
+
+    area = []
+    #  (x, y, w, h)
+    [area.append(crd[2]*crd[3]) for crd in cooridnates]
+
+    max_surface = max(area)
+    max_index = area.index(max_surface)
+
+    return cooridnates[max_index]
+
+
 # run detection on rotatet input images againt till ear is not found
 def rotate():
     pass
@@ -61,3 +78,33 @@ def preprocess(img):
     gray = cv.cvtColor(img, cv.COLOR_BGR2GRAY)
     equ = cv.equalizeHist(gray)
     return equ
+
+
+def enlargeBoundary(cords):
+    (x, y, w, h) = cords
+
+    w_gain = int(round(w * boundary_gain))
+    h_gain = int(round(h * boundary_gain))
+    # w_gain = 0
+    # h_gain = 0
+
+    # if x is less than ... then max(0,.. helps
+    x = max(0, int(round(x - w_gain / 2)))
+    y = max(0, int(round(y - h_gain / 2)))
+    w = w + w_gain
+    h = h + h_gain
+
+    return [x, y, w, h]
+
+
+def rotate():
+    # if len(res['left']) < 1 and len(res['right'] < 1):
+    #     for angle in angles:
+    #         rotated = ndimage.rotate(img, angle)
+    #         res = _detect(rotated)
+    #         if len(res['left']) >= 1 or len(res['right'] >= 1):
+    #             return res
+    pass
+
+
+

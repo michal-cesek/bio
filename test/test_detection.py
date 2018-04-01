@@ -8,7 +8,7 @@ def test_no_ear():
     ear = detect(data_path + 'noear.jpg')
 
     assert len(ear['left']) <= 0 and len(ear['left']) <= 0, \
-        'Detection not working propertly'
+        'Detection not working properly'
 
 
 def test_detect_in_all_images():
